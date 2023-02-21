@@ -23,7 +23,7 @@ int  main()
     memset(&serverInfo, 0, communicationLen);
     serverInfo.sin_family = AF_INET;
     serverInfo.sin_addr.s_addr = htonl(INADDR_ANY);
-    serverInfo.sin_port = htons(atoi("150000"));
+    serverInfo.sin_port = htons(atoi("15000"));
     int ret = bind(mySocket, (const sockaddr*)&serverInfo, communicationLen);
     if (ret != 0) {
         std::cout << "绑定失败" << std::endl;
