@@ -59,7 +59,7 @@ int main()
         std::cout << inet_ntoa(serverAddr.sin_addr) << " " << ntohs(serverAddr.sin_port) << " says: " <<
             recv_buff << std::endl;
         //std::string buff = recv_buff;
-        char dataNme[50];
+        char dataName[50];
         int dateLen;
         /*std::size_t found_1 = buff.find("name");
         if (found_1 != std::string::npos) {
@@ -72,13 +72,13 @@ int main()
             return FAIL;
         }
         dataName = buff.substr(found_1 + 1, found_2 - 1);*/
-        ret = sscanf(recv_buff, "name:%s size:%s;", dataNme, &dateLen);
+        ret = sscanf(recv_buff, "name:%s size:%d;", dataName, &dateLen);
         if (ret == FAIL) {
             std::cout <<" === 接收失败 === " << std::endl;
             close(clientSockfd);
             return FAIL;
         }
-        std::cout << dataName << std::endl << dataLen << std::endl;
+        std::cout << dataName << std::endl << dateLen << std::endl;
 
     }
     
