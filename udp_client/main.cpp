@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -21,8 +22,8 @@ int main()
     struct sockaddr_in serverAddr,clientAddr;
     int serverSockfd,clientSockfd;
 
-    char recv_buff[50];
-    char send_buff[50];
+    char recv_buff[50] = { 0 };
+    char send_buff[50] = { 0 };
     int ret; // 判断返回值
 
     int addrlen = sizeof(clientAddr);
@@ -39,6 +40,8 @@ int main()
 
     while (1) {
         std::cout << "====请输入信息====" << std::endl;
+        memset(send_buff, 0, sizeof(send_buff));
+        memset(recv_buff, 0, sizeof(recv_buff));
         scanf("%s", send_buff);
         ret = sendto(clientSockfd, send_buff, sizeof(send_buff), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
         if (ret == FAIL) {
