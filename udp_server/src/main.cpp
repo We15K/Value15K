@@ -45,11 +45,8 @@ int  main()
             std::cout << "接收数据出错" << std::endl;
             continue;
         }
-        std::cout << inet_ntoa(clientInfo.sin_addr) << " " << ntohs(clientInfo.sin_port) << " says: " <<
+        std::cout << inet_ntoa(clientInfo.sin_addr) << " " << ntohs(clientInfo.sin_port) << ": " <<
             recvBuffer << std::endl;
-        
-        // 等待 1s 将数据返回给客户端
-        sleep(1);
 
         recvBytes = sendto(mySocket, recvBuffer, strlen(recvBuffer),0, (struct sockaddr *)&clientInfo, communicationLen);
         if (recvBytes == -1) {
