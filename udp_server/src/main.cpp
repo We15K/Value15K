@@ -1,12 +1,46 @@
 #include <iostream>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+
+const std::string GetPic = "pic";
+
+void SendPic(int mySocket, struct sockaddr_in clientInfo);
+
+void SendPic(int mySocket, struct sockaddr_in clientInfo)
+{
+    std::string fileName = "images1.jpeg";
+    std::string sendData = "name:" + fileName + " ";
+
+    FILE* pFile = fopen("../images1.jpeg", "r");
+    long begin = ftell(pFile);
+    int ret = fseek(pFile, 0, SEEK_END);
+    if (ret != -1) {
+        std::cout << "fseek error" << std::endl;
+        fclose(pFile);
+        return;
+    }
+    long end = ftell(pFile);
+    long fileSize = end - begin;
+    std::string dataLong = std::to_string(fileSize);
+    sendData += "size:";
+    sendData += dataLong;
+
+    char sendBuffer[128] = { 0 };
+    strcpy(sendBuffer, sendData.c_str());
+    int recvBytes = sendto(mySocket, sendBuffer, strlen(sendBuffer),0, (struct sockaddr *)&clientInfo, sizeof(clientInfo));
+    if (recvBytes == -1) {
+        std::cout << "发送数据出错" << std::endl;
+    }
+
+    std::cout << sendBuffer << std::endl;
+}
 
 int  main()
 {
@@ -48,10 +82,9 @@ int  main()
         std::cout << inet_ntoa(clientInfo.sin_addr) << " " << ntohs(clientInfo.sin_port) << ": " <<
             recvBuffer << std::endl;
 
-        recvBytes = sendto(mySocket, recvBuffer, strlen(recvBuffer),0, (struct sockaddr *)&clientInfo, communicationLen);
-        if (recvBytes == -1) {
-            std::cout << "发送数据出错" << std::endl;
-            continue;
+        std::string cmd = recvBuffer;
+        if (cmd == GetPic) {
+            SendPic(mySocket, clientInfo);
         }
     }
 
