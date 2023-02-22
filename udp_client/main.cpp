@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include<stdio.h>
 
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -57,6 +58,28 @@ int main()
         }
         std::cout << inet_ntoa(serverAddr.sin_addr) << " " << ntohs(serverAddr.sin_port) << " says: " <<
             recv_buff << std::endl;
+        //std::string buff = recv_buff;
+        char dataNme[50];
+        int dateLen;
+        /*std::size_t found_1 = buff.find("name");
+        if (found_1 != std::string::npos) {
+            std::cout <<" === 接收失败 === " << std::endl;
+            return FAIL;
+        }
+        std::size_t found_2 = buff.find(";");
+        if (found_2 != std::string::npos) {
+            std::cout <<" === 接收失败 === " << std::endl;
+            return FAIL;
+        }
+        dataName = buff.substr(found_1 + 1, found_2 - 1);*/
+        ret = sscanf(recv_buff, "name:%s size:%s;", dataNme, &dateLen);
+        if (ret == FAIL) {
+            std::cout <<" === 接收失败 === " << std::endl;
+            close(clientSockfd);
+            return FAIL;
+        }
+        std::cout << dataName << std::endl << dataLen << std::endl;
+
     }
     
     close(clientSockfd);
