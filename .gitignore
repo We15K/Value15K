@@ -35,4 +35,4 @@
 build/
 
 # 忽略 soureData 目录下的所有文件
-soureData/
+sourceData/
