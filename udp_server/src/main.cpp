@@ -18,10 +18,11 @@ void SendPic(int mySocket, struct sockaddr_in clientInfo)
     std::string fileName = "images1.jpeg";
     std::string sendData = "name:" + fileName + " ";
 
-    FILE* pFile = fopen("../images1.jpeg", "r");
+    FILE* pFile = fopen("../sourceData/images1.jpeg", "r");
+
     long begin = ftell(pFile);
     int ret = fseek(pFile, 0, SEEK_END);
-    if (ret != -1) {
+    if (ret == -1) {
         std::cout << "fseek error" << std::endl;
         fclose(pFile);
         return;
@@ -84,6 +85,7 @@ int  main()
 
         std::string cmd = recvBuffer;
         if (cmd == GetPic) {
+            std::cout << "1111" << std::endl;
             SendPic(mySocket, clientInfo);
         }
     }
