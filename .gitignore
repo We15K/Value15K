@@ -36,3 +36,6 @@ build/
 
 # 忽略 soureData 目录下的所有文件
 sourceData/
+
+# 忽略 .vscode 目录下的所有文件
+.vscode/
