@@ -11,6 +11,10 @@ UdpServer::UdpServer()
 
     memset(&m_serverInfo, 0, sizeof(m_serverInfo));
     m_clientInfo.clear();
+
+    memset(&m_udpClientInfo, 0, sizeof(m_udpClientInfo));
+    m_lenClientInfo = 0;
+    m_recvBytes = 0;
 }
 
 // 释放资源
@@ -25,6 +29,9 @@ UdpServer::~UdpServer()
     if (!m_clientInfo.empty()) {
         m_clientInfo.clear();
     }
+    memset(&m_udpClientInfo, 0, sizeof(m_udpClientInfo));
+    m_lenClientInfo = 0;
+    m_recvBytes = 0;
 
     memset(m_recvData, 0, sizeof(m_recvData));
 }
@@ -41,6 +48,9 @@ void UdpServer::Close()
     if (!m_clientInfo.empty()) {
         m_clientInfo.clear();
     }
+    memset(&m_udpClientInfo, 0, sizeof(m_udpClientInfo));
+    m_lenClientInfo = 0;
+    m_recvBytes = 0;
 
     memset(m_recvData, 0, sizeof(m_recvData));
 }
@@ -66,36 +76,42 @@ int UdpServer::StartServer()
 
     std::cout << "---启动服务器成功---" << std::endl;
 
-    RecvData();
-
     return 0;
 }
 
 int UdpServer::RecvData()
 {
-    int recvBytes = 0;
-    int sendBytes = 0;
-    struct sockaddr_in clientInfo;
-    socklen_t lenClientInfo = sizeof(clientInfo);
-    std::vector<struct sockaddr_in>::iterator iter = m_clientInfo.begin();
-    while (true) {
-        std::cout << "等待客户端数据: ";
-        memset(m_recvData, 0, sizeof(m_recvData));
-        recvBytes = 0;
-        memset(&clientInfo, 0, sizeof(clientInfo));
+    std::cout << "等待数据..." << std::endl;;
+    m_recvBytes = 0;
+    m_sendBytes = 0;
+    m_lenClientInfo = sizeof(m_udpClientInfo);
+    memset(m_recvData, 0, sizeof(m_recvData));
+    memset(&m_udpClientInfo, 0, sizeof(m_udpClientInfo));
 
-        recvBytes = recvfrom(m_udpSocket, m_recvData, sizeof(m_recvData), 0, (struct sockaddr *)&clientInfo, &lenClientInfo);
-        if (recvBytes == -1) {
-            std::cout << "接收数据出错" << std::endl;
-            continue;
-        }
-        std::cout << inet_ntoa(clientInfo.sin_addr) << " " << ntohs(clientInfo.sin_port) << ": " <<
-            m_recvData << std::endl;
-        
-        sendBytes = sendto(m_udpSocket, m_recvData, sizeof(m_recvData), 0, (struct sockaddr *)&clientInfo, sizeof(clientInfo));
-        if (sendBytes == -1) {
-            std::cout << "发送数据出错" << std::endl;
-            continue;
-        }
+    m_recvBytes = recvfrom(m_udpSocket, m_recvData, sizeof(m_recvData), 0, (struct sockaddr *)&m_udpClientInfo, &m_lenClientInfo);
+    if (m_recvBytes == -1) {
+        std::cout << "接收数据出错" << std::endl;
+        return -1;
     }
+    std::cout << inet_ntoa(m_udpClientInfo.sin_addr) << " " << ntohs(m_udpClientInfo.sin_port) << ": " <<
+        m_recvData << std::endl;
+    
+    m_sendBytes = sendto(m_udpSocket, m_recvData, sizeof(m_recvData), 0, (struct sockaddr *)&m_udpClientInfo, m_lenClientInfo);
+    if (m_sendBytes == -1) {
+        std::cout << "发送数据出错" << std::endl;
+        return -1;
+    }
+
+    return 0;
+}
+
+int UdpServer::GetRecvData(void *recvData, int lenRecvData)
+{
+    if (lenRecvData != 1024) {
+        std::cout << "----数组长度需要为1024" << std::endl;
+        return -1;
+    }
+    memcpy(recvData, m_recvData, m_recvBytes);
+
+    return 0;
 }
