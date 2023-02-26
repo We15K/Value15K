@@ -4,7 +4,9 @@ int  main()
 {
     UdpServer server;
     server.StartServer();
-    server.RecvData();
+    while (1) {
+        server.RecvData();
+    }
 
     char recvData[1024] = { 0 };
     server.GetRecvData((void*)recvData, 1024);
