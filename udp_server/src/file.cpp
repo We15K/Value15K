@@ -13,6 +13,12 @@ FileOpr::FileOpr()
     m_dir = nullptr;
     m_fd = -1;
     m_dirInfo = nullptr;
+
+    m_fileName.clear();
+
+    m_fileNum = 0;
+
+    m_file = nullptr;
 }
 
 FileOpr::~FileOpr()
@@ -29,6 +35,12 @@ FileOpr::~FileOpr()
 
     if (!m_fileName.empty()) {
         m_fileName.clear();
+    }
+
+    m_fileNum = 0;
+
+    if (m_file != nullptr) {
+        fclose(m_file);
     }
 }
 
@@ -63,7 +75,61 @@ int FileOpr::FileList()
         m_fileName.insert(std::pair<int, std::string>(index, m_dirInfo->d_name));
         index++;
     }
+    m_fileNum = index;
 
     return 0;
 }
 
+long FileOpr::GetFileSize(int fileIndex)
+{
+    if (fileIndex < 0 || fileIndex >= m_fileNum) {
+        std::cout << "索引非法" << std::endl;
+        return -1;
+    }
+    std::map<int, std::string>::iterator iter = m_fileName.find(fileIndex);
+    if (iter == m_fileName.end()) {
+        std::cout << "索引不匹配" << std::endl;
+        return -1;
+    }
+    const std::string path = "/home/mengc0508/github/15K/Value15K/udp_server/sourceData/";
+    std::string fileName = iter->second;
+    std::cout << fileName.c_str() << std::endl;
+    fileName = path + fileName;
+    
+    std::cout << fileName.c_str() << std::endl;
+    m_file = fopen(fileName.c_str(), "r");
+    if (m_file == nullptr) {
+        std::cout << "打开文件出错" << std::endl;
+        return -1;
+    }
+    int ret = fseek(m_file, 0, SEEK_SET);
+    if (ret == -1) {
+        std::cout << "移动到文件头失败" << std::endl;
+        fclose(m_file);
+        m_file = nullptr;
+        return -1;
+    }
+    long fileBegin = ftell(m_file);
+    if (fileBegin == -1) {
+        std::cout << "获取到文件头失败" << std::endl;
+        fclose(m_file);
+        m_file = nullptr;
+        return -1;
+    }
+    ret = fseek(m_file, 0 , SEEK_END);
+    if (ret == -1) {
+        std::cout << "移动文件尾失败" << std::endl;
+        fclose(m_file);
+        m_file = nullptr;
+        return -1;
+    }
+    long fileEnd = ftell(m_file);
+    if (fileBegin == -1) {
+        std::cout << "获取文件尾失败" << std::endl;
+        fclose(m_file);
+        m_file = nullptr;
+        return -1;
+    }
+
+    return fileEnd - fileBegin;
+}
