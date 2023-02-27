@@ -25,14 +25,14 @@ public:
     int SendMsg();
     int RecvFile();
     int CloseFd();
-    
+    int GetBuff(char *recvBuff, int buffLen);
 private:
     int clientSockfd; //客户端套接字
     struct sockaddr_in serverAddr;
     struct sockaddr_in clientAddr;
     char recv_buff[50] = { 0 }; //存放接收消息
     char send_buff[50] = { 0 }; //存放发送消息
-    char dataName[50]; //文件名
-    int dateLen; //文件大小
+    char dataName[50] = { 0 }; //文件名
+    int dataLen; //文件大小
 
 };
