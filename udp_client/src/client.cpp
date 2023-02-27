@@ -50,13 +50,13 @@ int UdpClient::SendMsg()
 
 int UdpClient::RecvFile()
 {
-    int ret = sscanf(recv_buff, "name:%s size:%d;", dataName, &dateLen); //解析文件名和大小
+    int ret = sscanf(recv_buff, "name:%s size:%d;", dataName, &dataLen); //解析文件名和大小
     if (ret == FAIL) {
         std::cout <<" === 接收失败 === " << std::endl;
         close(clientSockfd);
         return FAIL;
     }
-    std::cout << dataName << std::endl << dateLen << std::endl;
+    std::cout << dataName << std::endl << dataLen << std::endl;
 
     return SUCCESS;
 }
@@ -64,6 +64,14 @@ int UdpClient::RecvFile()
 int UdpClient::CloseFd()
 {
     close(clientSockfd);
+    
+    return SUCCESS;
+}
+
+int UdpClient::GetBuff(char *recvBuff, int buffLen)
+{
+    memcpy(recvBuff, recv_buff, sizeof(recvBuff));
+    std::cout << " recvBuff: " << recvBuff << std::endl;
     
     return SUCCESS;
 }
