@@ -16,6 +16,7 @@ public:
 
     long GetFileSize(int fileIndex);
 
+    char *GetFileData(long fileSize);
 private:
     // 目录流指针
     DIR *m_dir;

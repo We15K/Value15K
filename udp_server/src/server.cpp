@@ -114,3 +114,18 @@ int UdpServer::GetRecvData(void *recvData, int lenRecvData)
 
     return 0;
 }
+
+int UdpServer::SendData(char *data, int dataLen)
+{
+    if (data == nullptr) {
+        std::cout << "发送数据非法" <<std::endl;
+        return -1;
+    }
+    m_sendBytes = sendto(m_udpSocket, data, dataLen, 0, (struct sockaddr *)&m_udpClientInfo, m_lenClientInfo);
+    if (m_sendBytes == -1) {
+        std::cout << "发送数据出错" << std::endl;
+        return -1;
+    }
+
+    return 0;
+}

@@ -1,5 +1,6 @@
 #include "server.h"
 #include "file.h"
+#include "req_parse.h"
 
 int  main()
 {
@@ -20,6 +21,14 @@ int  main()
     oprFile.FileList();
     long size = oprFile.GetFileSize(0);
     std::cout << "Size: " << size << std::endl;
+    char *fileData = oprFile.GetFileData(size);
+
+    Parse parse;
+    parse.ParseReq(recvData, sizeof(recvData));
+
+    std::string head = "get/server/getpic lenth:3300 ";
+    server.SendData((char *)head.c_str(), head.size());
+    server.SendData(fileData, size);
 
     return 0;
 }
