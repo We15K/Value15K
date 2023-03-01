@@ -16,7 +16,8 @@ public:
     int RecvData();
     // 拿到数据
     int GetRecvData(void *recvData, int lenRecvData);
-
+    // 发送数据
+    int SendData(char *data, int dataLen);
 private:
     // 服务端域套字
     int m_udpSocket;

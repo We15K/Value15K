@@ -133,3 +133,30 @@ long FileOpr::GetFileSize(int fileIndex)
 
     return fileEnd - fileBegin;
 }
+
+char *FileOpr::GetFileData(long fileLen)
+{
+    if (fileLen <= 0) {
+        std::cout << "文件大小入参非法" <<std::endl;
+        return nullptr;
+    }
+    if (m_file == nullptr) {
+        std::cout << "读取内容失败,需要先打开文件" <<std::endl;
+        return nullptr;
+    }
+    char *fileData = (char *)malloc(fileLen);
+    if (fileData == nullptr) {
+        std::cout << "开辟堆空间失败" << std::endl;
+        return nullptr;
+    }
+    int ret = fseek(m_file, 0, SEEK_SET);
+    if (ret == -1) {
+        std::cout << "移动到文件头失败" << std::endl;
+        fclose(m_file);
+        m_file = nullptr;
+        return nullptr;
+    }
+    ret = fread((void*)fileData, 1, fileLen, m_file);
+
+    return fileData;
+}
