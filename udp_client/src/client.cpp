@@ -35,9 +35,9 @@ int UdpClient::RecvMsg()
 int UdpClient::SendMsg(char *send_buff, int length)
 {
     //std::cout << " ==== 请输入信息 ==== " << std::endl;
-    memset(send_buff, 0, sizeof(send_buff));
+    // memset(send_buff, 0, sizeof(send_buff));
     //scanf("%s", send_buff);
-    int ret = sendto(clientSockfd, send_buff, sizeof(send_buff), 0,
+    int ret = sendto(clientSockfd, send_buff, length, 0,
                 (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if (ret == FAIL) {
         std::cout << " ==== 信息发送失败！！！==== " << std::endl;
@@ -70,7 +70,7 @@ int UdpClient::CloseFd()
 
 int UdpClient::GetBuff(char *recvBuff, int buffLen)
 {
-    memcpy(recvBuff, recv_buff, sizeof(recvBuff));
+    memcpy(recvBuff, recv_buff, buffLen);
     std::cout << " recvBuff: " << recvBuff << std::endl;
     
     return SUCCESS;

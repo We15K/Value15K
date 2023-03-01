@@ -14,6 +14,8 @@ char *UdpData::GetSpecifyPic()
         req == NULL;
         return nullptr;
     }
+    std::cout << "req: " << req << std::endl;
+    std::cout << "len: " << strlen(req) << std::endl;
 
     return req;
 }

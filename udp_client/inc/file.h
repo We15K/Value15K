@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
-#define ADDRESS "../sourceData/1.txt"
+#define ADDRESS "../sourceData/1.jpeg"
 #define FAIL -1
 #define SUCCESS 0
 #define BUFF_SIZE 1024

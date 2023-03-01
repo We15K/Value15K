@@ -28,7 +28,10 @@ int  main()
 
     std::string head = "get/server/getpic lenth:3300 ";
     server.SendData((char *)head.c_str(), head.size());
+    std::cout << "send head " << head.c_str() <<std::endl;
+
     server.SendData(fileData, size);
+    std::cout << "data" << fileData <<std::endl;
 
     return 0;
 }

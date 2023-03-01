@@ -7,13 +7,18 @@ int main()
     UdpClient Client;
     UdpFile File;
     UdpData Data;
-    char fileBuff[BUFF_SIZE] = { 0 };
+    char fileBuff[BUFF_SIZE * 5] = { 0 };
     char readFeil[BUFF_SIZE] = { 0 };
     Client.Socket();
+    char *data = Data.GetSpecifyPic();
+    int dataLen = strlen(data);
     while (1) {
-        Client.SendMsg(Data.GetSpecifyPic(), strlen(Data.GetSpecifyPic()));
+        Client.SendMsg(data, dataLen);
         Client.RecvMsg();
-        Client.RecvFile();
+        // Client.RecvFile();
+        Client.GetBuff(fileBuff, sizeof(fileBuff));
+        
+        Client.RecvMsg();
         Client.GetBuff(fileBuff, sizeof(fileBuff));
         break;
     }
