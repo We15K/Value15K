@@ -94,12 +94,6 @@ int UdpServer::RecvData()
     }
     std::cout << inet_ntoa(m_udpClientInfo.sin_addr) << " " << ntohs(m_udpClientInfo.sin_port) << ": " <<
         m_recvData << std::endl;
-    
-    m_sendBytes = sendto(m_udpSocket, m_recvData, sizeof(m_recvData), 0, (struct sockaddr *)&m_udpClientInfo, m_lenClientInfo);
-    if (m_sendBytes == -1) {
-        std::cout << "发送数据出错" << std::endl;
-        return -1;
-    }
 
     return 0;
 }

@@ -30,7 +30,7 @@ private:
     int clientSockfd; //客户端套接字
     struct sockaddr_in serverAddr;
     struct sockaddr_in clientAddr;
-    char recv_buff[50] = { 0 }; //存放接收消息
+    char recv_buff[5 * 1024] = { 0 }; //存放接收消息
     char send_buff[50] = { 0 }; //存放发送消息
     char dataName[50] = { 0 }; //文件名
     int dataLen; //文件大小
