@@ -32,11 +32,11 @@ int UdpClient::RecvMsg()
     return SUCCESS;
 }
 
-int UdpClient::SendMsg()
+int UdpClient::SendMsg(char *send_buff, int length)
 {
-    std::cout << " ==== 请输入信息 ==== " << std::endl;
+    //std::cout << " ==== 请输入信息 ==== " << std::endl;
     memset(send_buff, 0, sizeof(send_buff));
-    scanf("%s", send_buff);
+    //scanf("%s", send_buff);
     int ret = sendto(clientSockfd, send_buff, sizeof(send_buff), 0,
                 (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if (ret == FAIL) {

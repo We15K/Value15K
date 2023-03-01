@@ -22,7 +22,7 @@ class UdpClient {
 public:
     int Socket();
     int RecvMsg();
-    int SendMsg();
+    int SendMsg(char *send_buff, int length);
     int RecvFile();
     int CloseFd();
     int GetBuff(char *recvBuff, int buffLen);
