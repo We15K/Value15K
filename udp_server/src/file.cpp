@@ -55,11 +55,14 @@ int FileOpr::OpenDir(std::string dirPath)
         std::cout << "打开目录失败" << std::endl;
         return -1;
     }
+    InitList();
+    closedir(m_dir);
+    m_dir = nullptr;
 
     return 0;
 }
 
-int FileOpr::FileList()
+int FileOpr::InitList()
 {
     if (m_dir == nullptr) {
         std::cout << "需要先打开一个目录" << std::endl;
@@ -80,6 +83,7 @@ int FileOpr::FileList()
     return 0;
 }
 
+// 获取文件大小
 long FileOpr::GetFileSize(int fileIndex)
 {
     if (fileIndex < 0 || fileIndex >= m_fileNum) {
@@ -91,10 +95,13 @@ long FileOpr::GetFileSize(int fileIndex)
         std::cout << "索引不匹配" << std::endl;
         return -1;
     }
+
+    // 用户访问目录
     const std::string path = "/home/mengc0508/github/15K/Value15K/udp_server/sourceData/";
     std::string fileName = iter->second;
     std::cout << fileName.c_str() << std::endl;
     fileName = path + fileName;
+    m_filePath = fileName;
     
     std::cout << fileName.c_str() << std::endl;
     m_file = fopen(fileName.c_str(), "r");
@@ -130,23 +137,35 @@ long FileOpr::GetFileSize(int fileIndex)
         m_file = nullptr;
         return -1;
     }
+    fclose(m_file);
+    m_file = nullptr;
 
-    return fileEnd - fileBegin;
+    m_fileSize = fileEnd - fileBegin;
+
+    return m_fileSize;
 }
 
+// 获取文件数据
 char *FileOpr::GetFileData(long fileLen)
 {
-    if (fileLen <= 0) {
-        std::cout << "文件大小入参非法" <<std::endl;
+    if (fileLen <= 0 || fileLen > m_fileSize) {
+        std::cout << "文件大小入参非法: " << fileLen << std::endl;
         return nullptr;
     }
+    if (m_filePath.empty()) {
+        std::cout << "需要指定打开的文件" << std::endl;
+        return nullptr;
+    }
+    m_file = fopen(m_filePath.c_str(), "r");
     if (m_file == nullptr) {
-        std::cout << "读取内容失败,需要先打开文件" <<std::endl;
+        std::cout << "打开文件失败" <<std::endl;
         return nullptr;
     }
     char *fileData = (char *)malloc(fileLen);
     if (fileData == nullptr) {
         std::cout << "开辟堆空间失败" << std::endl;
+        fclose(m_file);
+        m_file = nullptr;
         return nullptr;
     }
     int ret = fseek(m_file, 0, SEEK_SET);
@@ -154,9 +173,14 @@ char *FileOpr::GetFileData(long fileLen)
         std::cout << "移动到文件头失败" << std::endl;
         fclose(m_file);
         m_file = nullptr;
+        free(fileData);
+        fileData = nullptr;
         return nullptr;
     }
     ret = fread((void*)fileData, 1, fileLen, m_file);
+
+    fclose(m_file);
+    m_file = nullptr;
 
     return fileData;
 }

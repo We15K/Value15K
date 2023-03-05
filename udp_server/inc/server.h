@@ -13,12 +13,12 @@ public:
 
     int StartServer();
     // 接收数据
-    int RecvData();
-    // 拿到数据
-    int GetRecvData(void *recvData, int lenRecvData);
-    // 发送数据
-    int SendData(char *data, int dataLen);
+    int RecvData(void *recvData, int lenRecvData);
+
+    // 发送数据 发送的数据存储在堆区，发送完成后需要释放内存
+    int SendData(void *data, int dataLen, int needFree = 0);
 private:
+    int m_serverIsStart; 
     // 服务端域套字
     int m_udpSocket;
 
