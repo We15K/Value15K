@@ -27,7 +27,7 @@ ThreadPool::ThreadPool()
     m_busyThreadNum = 0;
     m_needExitThreadNum = 0;
 
-    m_waitTaskQueueSize = 0;
+    m_waitTaskQueueSize = 30;
 }
 
 /**************************************************************************
@@ -59,16 +59,17 @@ Description:工作线程执行函数
 **************************************************************************/
 void *ThreadPool::WorkThreadFunc()
 {
-    std::cout << "工作线程: " << std::hex << pthread_self() << std::endl;
+    pthread_mutex_lock(&m_poolLock);
+    m_liveThreadNum++;
+    pthread_mutex_unlock(&m_poolLock);
 
     // 线程阻塞在等待not empty信号，线程池开启任务队列等待任务为0
     while (true) {
         pthread_mutex_lock(&m_poolLock);
-        m_liveThreadNum++;
 
         // 任务到来后，跳出循环
         while (m_shutDown && m_waitTaskQueueSize == 0) {
-            std::cout << std::hex << pthread_self() << ": 等待任务" << std::endl;
+            std::cout << "0x" << std::hex << pthread_self() << ": 等待任务" << std::endl;
 
             // 将线程放在等待队列， 等待not emmpty信号到来后，解锁pool lock
             pthread_cond_wait(&m_taskQueueNotEmpty, &m_poolLock);
@@ -77,7 +78,7 @@ void *ThreadPool::WorkThreadFunc()
             if (m_needExitThreadNum > 0) {
                 m_needExitThreadNum--;
                 if (m_liveThreadNum > m_minThreadNum) {
-                    std::cout << "空闲进程清理, " << pthread_self() << ": 退出" << std::endl;
+                    std::cout << "0x" << pthread_self() << ": 线程退出" << std::endl;
                     m_liveThreadNum--;
                     pthread_mutex_unlock(&m_poolLock);
                     pthread_exit(nullptr);
@@ -94,7 +95,7 @@ void *ThreadPool::WorkThreadFunc()
         }
 
         /* 拿出任务 */
-        std::cout << "拿出任务" << std::endl;
+        std::cout << "0x" << std::hex << pthread_self() <<": 拿出任务" << std::endl;
         m_waitTaskQueueSize--;
 
         // 拿出任务后,通知可以添加任务
@@ -104,7 +105,7 @@ void *ThreadPool::WorkThreadFunc()
         pthread_mutex_unlock(&m_poolLock);
     
         /* 执行拿出的任务 */
-        std::cout << std::hex << pthread_self() << ": 开始处理任务" << std::endl;
+        std::cout << "0x" << std::hex << pthread_self() << ": 开始处理任务" << std::endl;
 
         // 锁住忙线程数量
         pthread_mutex_lock(&m_busyThreadLock);
@@ -112,9 +113,10 @@ void *ThreadPool::WorkThreadFunc()
         pthread_mutex_unlock(&m_busyThreadLock);
 
         // 执行任务
+        sleep(10);
 
         // 任务结束处理
-        std::cout << std::hex << pthread_self() << ": 任务处理完成" << std::endl;
+        std::cout << "0x" << std::hex << pthread_self() << ": 任务处理完成" << std::endl;
         pthread_mutex_lock(&m_busyThreadLock);
         m_busyThreadNum--;
         pthread_mutex_unlock(&m_busyThreadLock);
@@ -142,7 +144,7 @@ void *ThreadPool::AdminThreadFunc()
     while (m_shutDown) {
 
         // 隔一段时间再管理
-        sleep(20);
+        sleep(5);
         int ret = 0;
         pthread_mutex_lock(&m_poolLock);
         int waitQueueSize = m_waitTaskQueueSize;
@@ -153,14 +155,15 @@ void *ThreadPool::AdminThreadFunc()
         int busyThreadNum = m_busyThreadNum;
         pthread_mutex_unlock(&m_busyThreadLock);
     
-        std::cout << "----------线程及任务信息----------" << std::endl;
-        std::cout << "等待任务数量: " << waitQueueSize <<std::endl;
-        std::cout << "忙线程数量: " << busyThreadNum <<std::endl;
-        std::cout << "存活线程数量: " << liveThreadNum <<std::endl;
-        std::cout << "--------------------------------" << std::endl;
+        std::cout << std::endl << std::endl
+        << "----------线程及任务信息----------" << std::endl
+        << "等待任务数量\t\t0x" << waitQueueSize <<std::endl
+        << "忙线程数量\t\t0x" << busyThreadNum <<std::endl
+        << "存活线程数量\t\t0x" << liveThreadNum <<std::endl
+        << "----------------------------------" << std::endl;
 
         if (waitQueueSize >= MIN_CREATE_THREAD_NUM && liveThreadNum < m_maxThreadNum) {
-            std::cout << "任务堆积，需要创建新的线程，堆积任务数: " << waitQueueSize << std::endl;
+            std::cout << "任务堆积，需要创建新的线程，堆积任务数: 0x" << waitQueueSize << std::endl;
 
             pthread_mutex_lock(&m_poolLock);
             int addThreadNum = 0;
@@ -178,8 +181,7 @@ void *ThreadPool::AdminThreadFunc()
                         std::cout << "设置工作线程属性失败" << std::endl;
                     }
                     addThreadNum++;
-                    m_liveThreadNum++;
-                    std::cout << "新增工作线程: " << std::hex << m_threads[loopNum] << std::endl;
+                    std::cout << std::hex << "0x" << m_threads[loopNum] << ": 新增工作线程"<< std::endl;
                 }
             }
             pthread_mutex_unlock(&m_poolLock);
@@ -188,6 +190,7 @@ void *ThreadPool::AdminThreadFunc()
         if (busyThreadNum * 2 < liveThreadNum && liveThreadNum > m_minThreadNum) {
 
             // 忙线程数量不足存活线程的一半，并且存活线程大于最小线程数，一次销毁MIN_DESTORY_THREAD_NUM个线程
+            std::cout << "空闲线程堆积，需要销毁空闲线程，空闲线程数: 0x" << liveThreadNum - busyThreadNum << std::endl;
             pthread_mutex_lock(&m_poolLock);
             m_needExitThreadNum = MIN_DESTORY_THREAD_NUM;
             pthread_mutex_unlock(&m_poolLock);
@@ -196,7 +199,6 @@ void *ThreadPool::AdminThreadFunc()
 
                 // 通知空闲线程退出
                 pthread_cond_signal(&m_taskQueueNotEmpty);
-                std::cout << "清理空闲线程" << std::endl;
             }
         }
     }
